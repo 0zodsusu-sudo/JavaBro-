@@ -93,6 +93,8 @@ button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer;bo
 footer{padding:2rem 4%;color:var(--muted);font-size:.85rem;text-align:center;position:relative;z-index:5;background:rgba(0,0,0,.55)}
 @media(max-width:1200px){.nav{display:none}#product-img{height:44vh;top:36%}.hero{height:auto;min-height:100vh}.hero-content{flex-direction:column;min-height:calc(100vh - 5rem)}.hero-left{padding:calc(38vh + 3rem) 0 1rem}.hero-right{width:100%;align-items:center;text-align:center;padding:1rem 0 2rem}.product-carousel{align-items:center;padding-top:5rem}.side-title{align-self:center}.main-title,.side-title{font-size:4rem}}
 @media(max-width:700px){.header{padding:.8rem 3%}.logo span{display:none}.pill{padding:.6rem .85rem;font-size:.75rem}.tools{gap:.3rem}.pill b{margin-left:.3rem}.two{grid-template-columns:1fr}}
+.x{position:sticky;top:0;display:block;margin:-.3rem 0 .6rem auto;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:1.1rem;z-index:3}
+.dh{display:flex;align-items:center;gap:.8rem;margin-bottom:1rem}.dh h3{margin:0!important}
 </style>
 </head>
 <body>
@@ -125,7 +127,7 @@ footer{padding:2rem 4%;color:var(--muted);font-size:.85rem;text-align:center;pos
 </main>
 <footer id="foot">Orbit · онлайн-магазин · Ташкент · hello@orbit.example</footer>
 <div class="mask" id="mask" data-act="close"></div>
-<aside class="drawer" id="drawer"><h3>Корзина</h3><div class="items" id="items"></div><div class="total"><span>Итого</span><span id="sum">$0.00</span></div><button class="wide" data-act="checkout">Оформить заказ</button></aside>
+<aside class="drawer" id="drawer"><div class="dh"><button class="nav-arrow" data-act="close" aria-label="Назад">←</button><h3>Корзина</h3></div><div class="items" id="items"></div><div class="total"><span>Итого</span><span id="sum">$0.00</span></div><button class="wide" data-act="checkout">Оформить заказ</button><button class="lnk" style="margin-top:.9rem;text-align:center" data-act="close">← Продолжить покупки</button></aside>
 <div class="modal" id="modal"><div class="box" id="box"></div></div>
 <div class="toast" id="toast"></div>
 
@@ -219,7 +221,7 @@ const addCart=id=>{cart[id]=(cart[id]||0)+1;saveCart();toast('Добавлено
 
 /* ---- вход, регистрация, админка (Firebase) ---- */
 const fd=sel=>{const o={};document.querySelector(sel).querySelectorAll('input,select,textarea').forEach(el=>{o[el.name]=el.type==='file'?el.files[0]:el.type==='checkbox'?el.checked:el.value});return o};
-const openModal=h=>{window.onEnter=null;$('#box').innerHTML=h;$('#modal').classList.add('open')};
+const openModal=h=>{window.onEnter=null;$('#box').innerHTML='<button class="x" data-act="close" aria-label="Закрыть">✕</button>'+h;$('#modal').classList.add('open')};
 const closeAll=()=>{$('#modal').classList.remove('open');$('#drawer').classList.remove('open');$('#mask').classList.remove('open')};
 const fbErr=c=>({'auth/invalid-credential':'Неверный email или пароль','auth/invalid-email':'Некорректный email','auth/email-already-in-use':'Такой email уже зарегистрирован','auth/weak-password':'Пароль слишком простой (минимум 6 символов)','auth/too-many-requests':'Слишком много попыток, подождите немного','auth/network-request-failed':'Нет интернета','auth/operation-not-allowed':'В Firebase не включён вход по Email/Password','permission-denied':'Нет прав на это действие'}[c]||'Ошибка: '+c);
 function authView(mode,err=''){const reg=mode=='reg';
@@ -240,7 +242,7 @@ onAuthStateChanged(auth,async u=>{
 function readImg(file,max){return new Promise((ok,no)=>{const r=new FileReader();r.onerror=no;r.onload=()=>{const im=new Image();im.onerror=no;im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/webp',.82))};im.src=r.result};r.readAsDataURL(file)})}
 async function adminView(){if(!isAdmin())return;
  if(isSuper()){try{adminList=(await getDocs(collection(db,'admins'))).docs.map(d=>({email:d.id,...d.data()}))}catch(e){adminList=[]}}
- openModal(`<h3>Новый товар</h3><div id="pf" class="fm"><input name="name" placeholder="Название" required maxlength="40"><div class="two"><input name="price" type="number" step="0.01" min="0" placeholder="Цена, $" required><input name="cat" placeholder="Категория" required maxlength="24"></div><textarea name="desc" rows="2" placeholder="Описание" maxlength="160"></textarea><label>Фото товара (лучше PNG без фона)<input name="img" type="file" accept="image/*" required></label><label>Логотип для частиц вокруг товара (необязательно)<input name="logo" type="file" accept="image/*"></label><label class="chk"><input name="noPart" type="checkbox"> Без частиц</label><label>Цвет фона страницы для этого товара<input name="c1" type="color" value="#7c3aed"></label><div class="err" id="pe"></div><button class="wide" data-act="doAdd">Добавить в магазин</button></div><h3 style="margin-top:1.5rem">Товары (${products.length})</h3>${products.map(p=>`<div class="al"><img src="${esc(p.img)}" alt=""><b>${esc(p.name)}</b><span>${money(p.price)}</span>${p.builtin?'<span>встроенный</span>':`<button data-act="del" data-id="${esc(p.id)}">Удалить</button>`}</div>`).join('')}${superBlock()}`);
+ openModal(`<div class="two" style="margin-bottom:1rem"><button class="mini" data-act="close">← К магазину</button><button class="mini" data-act="logout">Выйти из аккаунта</button></div><h3>Новый товар</h3><div id="pf" class="fm"><input name="name" placeholder="Название" required maxlength="40"><div class="two"><input name="price" type="number" step="0.01" min="0" placeholder="Цена, $" required><input name="cat" placeholder="Категория" required maxlength="24"></div><textarea name="desc" rows="2" placeholder="Описание" maxlength="160"></textarea><label>Фото товара (лучше PNG без фона)<input name="img" type="file" accept="image/*" required></label><label>Логотип для частиц вокруг товара (необязательно)<input name="logo" type="file" accept="image/*"></label><label class="chk"><input name="noPart" type="checkbox"> Без частиц</label><label>Цвет фона страницы для этого товара<input name="c1" type="color" value="#7c3aed"></label><div class="err" id="pe"></div><button class="wide" data-act="doAdd">Добавить в магазин</button></div><h3 style="margin-top:1.5rem">Товары (${products.length})</h3>${products.map(p=>`<div class="al"><img src="${esc(p.img)}" alt=""><b>${esc(p.name)}</b><span>${money(p.price)}</span>${p.builtin?'<span>встроенный</span>':`<button data-act="del" data-id="${esc(p.id)}">Удалить</button>`}</div>`).join('')}${superBlock()}`);
  window.doAdd=async()=>{const f=fd('#pf'),pe=$('#pe');
   if(!f.name.trim()||f.price===''||!f.cat.trim()||!f.img)return pe.textContent='Заполните название, цену, категорию и выберите фото';
   if(!HEX.test(f.c1))return;pe.textContent='Сохраняю…';
@@ -275,7 +277,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('[data-act]
  revoke:async()=>{if(!isSuper())return;try{await deleteDoc(doc(db,'admins',t.dataset.email));adminView();toast('Права сняты')}catch(x){toast(fbErr(x.code))}},
  del:async()=>{try{await deleteDoc(doc(db,'products',id));delete cart[id];saveCart();adminView();toast('Товар удалён')}catch(x){toast(fbErr(x.code))}}};
  acts[t.dataset.act]?.()});
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.closest&&e.target.closest('#af')&&window.onEnter)window.onEnter()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll();if(e.key==='Enter'&&e.target.closest&&e.target.closest('#af')&&window.onEnter)window.onEnter()});
 $('#modal').addEventListener('click',e=>{if(e.target.id=='modal')closeAll()});
 $('#q').addEventListener('input',e=>{query=e.target.value;renderShop()});
 
