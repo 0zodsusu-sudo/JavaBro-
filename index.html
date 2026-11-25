@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Orbit Store | Pure Zero Refreshment</title>
+<title>HYPEON</title>
 <meta name="description" content="Онлайн-магазин: корзина, админ-панель, свои товары с фото и логотипом.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,17 +100,17 @@ footer{padding:2rem 4%;color:var(--muted);font-size:.85rem;text-align:center;pos
 <body>
 <div id="bubbles"></div>
 <header class="header">
- <div class="logo"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8V16M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Orbit</span></div>
+ <div class="logo"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8V16M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>HYPEON</span></div>
  <nav class="nav glass"><a href="#top" class="active">Главная</a><a href="#catalog">Каталог</a><a href="#foot">Контакты</a></nav>
  <div class="tools"><button class="pill adm" id="adminBtn" data-act="admin" hidden>Админ</button><button class="pill" id="authBtn" data-act="auth">Войти</button><button class="pill" data-act="cart">Корзина<b id="cnt">0</b></button></div>
 </header>
 <main id="top">
 <section class="hero"><div class="hero-content">
  <div class="hero-left">
-  <h1 class="main-title"><span class="out">Pure</span><br>Zero</h1>
+  <h1 class="main-title"><span class="out">HYPE</span><br>ON</h1>
   <div class="pname" id="hName"></div>
   <p class="description" id="hDesc"></p>
-  <div><button class="primary-btn" data-act="addHero"><span id="hPrice"></span> В корзину <span class="plus-icon">+</span></button></div>
+  <div id="hAction"><button class="primary-btn" data-act="addHero"><span id="hPrice"></span> В корзину <span class="plus-icon">+</span></button></div>
   <div class="award-badge"><div class="award-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 15L15 18L19 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="award-text"><span>DESIGN AWARDS</span><span>PREMIUM STORE 2026</span></div></div>
  </div>
  <div class="pl" id="bgb"></div>
@@ -125,7 +125,7 @@ footer{padding:2rem 4%;color:var(--muted);font-size:.85rem;text-align:center;pos
  <div class="bar"><input class="search" id="q" placeholder="Поиск товаров…"><div class="chips" id="chips"></div></div>
  <div class="grid" id="grid"></div></section>
 </main>
-<footer id="foot">Orbit · онлайн-магазин · Ташкент · hello@orbit.example</footer>
+<footer id="foot">HYPEON · онлайн-магазин · Ташкент · hello@hypeon.example</footer>
 <div class="mask" id="mask" data-act="close"></div>
 <aside class="drawer" id="drawer"><div class="dh"><button class="nav-arrow" data-act="close" aria-label="Назад">←</button><h3>Корзина</h3></div><div class="items" id="items"></div><div class="total"><span>Итого</span><span id="sum">$0.00</span></div><button class="wide" data-act="checkout">Оформить заказ</button><button class="lnk" style="margin-top:.9rem;text-align:center" data-act="close">← Продолжить покупки</button></aside>
 <div class="modal" id="modal"><div class="box" id="box"></div></div>
@@ -142,12 +142,8 @@ let cur=null,adminList=[],openAdminAfter=false;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
-const A='https://api.getlayers.ai/storage/v1/object/public/public/assets/soda-14ff8a788d/';
-const DEF=[
-{id:1,name:'Diet Classic',price:2.99,cat:'Напитки',img:A+'Green%20Soda.png',c1:'#0b8a78',mid:'#044e3b',out:'#011411',desc:'Хрустящий вкус без сахара. Пузырьки в каждом глотке.'},
-{id:2,name:'Zero Lime',price:2.99,cat:'Напитки',img:A+'Blue%20Soda.png',dim:1,c1:'#0b4f8a',mid:'#04294e',out:'#010c14',desc:'Лайм и голубика, ноль сахара, ноль компромиссов.'}];
-let products=DEF.map(x=>({...x,builtin:1})),cart=ls.get('orbit_v3_cart',{}),fbProducts=[];
-let fid=products[0]?.id,cp=0,cat='Все',query='',isSwitching=false,switchSpin=0;
+let products=[],cart=ls.get('orbit_v3_cart',{}),fbProducts=[];
+let fid=null,cp=0,cat='Все',query='',isSwitching=false,switchSpin=0;
 const money=n=>'$'+Number(n).toFixed(2),P=id=>products.find(p=>p.id==id),user=()=>cur,isAdmin=()=>['admin','super'].includes(user()?.role),isSuper=()=>user()?.role==='super';
 const superBlock=()=>!isSuper()?'':`<h3 style="margin-top:1.5rem">Администраторы</h3><div id="sf" class="fm"><input name="name" placeholder="Имя" maxlength="30"><input name="email" type="email" placeholder="Email нового админа"><input name="pass" type="text" placeholder="Пароль (мин. 6 символов)"><div class="err" id="se"></div><button class="wide" data-act="doAdmin">Добавить администратора</button></div><div class="al"><b>Java</b><span>${esc(SUPER_EMAIL)}</span><span>супер</span></div>${adminList.map(u=>`<div class="al"><b>${esc(u.name||'')}</b><span>${esc(u.email)}</span><button data-act="revoke" data-email="${esc(u.email)}">Снять</button></div>`).join('')}`;
 const HEX=/^#[0-9a-f]{6}$/i,SHADOW='drop-shadow(0 40px 50px rgba(0,0,0,.5))';
@@ -157,19 +153,31 @@ const pimg=p=>p.logo||p.img;
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)}
 
 /* ---- частицы (логотип товара) ---- */
-const mk=(i)=>`<img class="berry b${i}" alt="" src="${esc(pimg(P(fid)||{img:''}))}">`;
+const mk=(i)=>`<img class="berry b${i}" alt="" src="">`;
 $('#fgb').innerHTML=[1,2,3,4,5,6].map(mk).join('');$('#bgb').innerHTML=[7,8,9].map(mk).join('');
 const berriesFG=$('#fgb'),berriesBG=$('#bgb'),prodImg=$('#product-img'),allBerries=document.querySelectorAll('.berry');
-allBerries.forEach(b=>{b.dataset.rx=0;b.dataset.ry=0;b.dataset.angle=Math.random()*360;b.dataset.baseX=0;b.dataset.baseY=0});
-const noPart=p=>!!p.noPart;
+allBerries.forEach(b=>{b.dataset.rx=0;b.dataset.ry=0;b.dataset.angle=Math.random()*360;b.dataset.baseX=0;b.dataset.baseY=0;b.style.opacity=0});
+const noPart=p=>!p||!!p.noPart;
 
-function renderHero(){const p=P(fid);if(!p)return;
+function renderHero(){
+ const p=P(fid);
+ if(!p){
+  $('#hName').textContent='';
+  $('#hDesc').textContent='Товаров пока нет. Добавьте первый товар через админ-панель.';
+  $('#hAction').style.display='none';
+  $('#cards').innerHTML='';
+  prodImg.removeAttribute('src');
+  allBerries.forEach(b=>{b.removeAttribute('src');b.style.opacity=0});
+  return;
+ }
+ $('#hAction').style.display='';
  $('#hName').textContent=p.name;$('#hDesc').textContent=p.desc;$('#hPrice').textContent=money(p.price);
  const vs=[0,1].map(i=>products[(cp+i)%products.length]).filter((x,i,a)=>x&&a.indexOf(x)===i);
  $('#cards').innerHTML=vs.map(x=>`<div class="card ${x.id==fid?'active':''}" data-act="pick" data-id="${x.id}"><img src="${esc(x.img)}" alt="${esc(x.name)}"${x.dim?' style="filter:brightness(.7)"':''}><div class="card-info"><span>${esc(x.name)}</span><span>${money(x.price)}</span></div></div>`).join('')}
 function pick(id){if(isSwitching||id==fid)return;fid=id;renderHero();switchProduct(P(id))}
 
 function switchProduct(p){
+ if(!p){prodImg.removeAttribute('src');allBerries.forEach(b=>{b.removeAttribute('src');b.style.opacity=0});return}
  isSwitching=true;const hc=$('#hc');
  gsap.to(document.body,{...colors(p),duration:1.5,ease:'power2.inOut'});
  const so={val:0,blur:0},upd=()=>{switchSpin=so.val;prodImg.style.filter=`blur(${so.blur}px) ${SHADOW}`};
@@ -197,7 +205,7 @@ function animate(){const time=Date.now()*.001;
  cm.x+=(mouse.x-cm.x)*.05;cm.y+=(mouse.y-cm.y)*.05;
  prodImg.style.transform=`translate(-50%,-50%) perspective(900px) rotateY(${cm.x*40+switchSpin}deg) rotateX(${-cm.y*20}deg) rotate(12deg)`;
  berriesFG.style.transform=`translate(${cm.x*60}px,${cm.y*60}px)`;berriesBG.style.transform=`translate(${cm.x*-30}px,${cm.y*-30}px)`;
- if(!isSwitching)allBerries.forEach((berry,i)=>{
+ if(!isSwitching&&products.length)allBerries.forEach((berry,i)=>{
   const r=berry.getBoundingClientRect(),dx=mouse.px-(r.left+r.width/2),dy=mouse.py-(r.top+r.height/2),dist=Math.hypot(dx,dy)||1;
   let tx=0,ty=0,sm=1;if(dist<400){const f=(400-dist)/400;tx=dx/dist*f*-80;ty=dy/dist*f*-80;sm=1+f*5}
   let rx=+berry.dataset.rx||0,ry=+berry.dataset.ry||0,ang=+berry.dataset.angle||0,bx=+berry.dataset.baseX||0,by=+berry.dataset.baseY||0;
@@ -210,6 +218,7 @@ setInterval(()=>{if(document.hidden)return;const b=document.createElement('div')
 
 /* ---- каталог и корзина ---- */
 function renderShop(){const cats=['Все',...new Set(products.map(p=>p.cat))];
+ if(!cats.includes(cat))cat='Все';
  $('#chips').innerHTML=cats.map(c=>`<button class="chip ${c==cat?'on':''}" data-act="cat" data-c="${esc(c)}">${esc(c)}</button>`).join('');
  const l=products.filter(p=>(cat=='Все'||p.cat==cat)&&(p.name+p.desc+p.cat).toLowerCase().includes(query.toLowerCase()));
  $('#grid').innerHTML=l.length?l.map(p=>`<article class="pc"><img src="${esc(p.img)}" alt="${esc(p.name)}"${p.dim?' style="filter:brightness(.7) drop-shadow(0 20px 30px rgba(0,0,0,.5))"':''}><small>${esc(p.cat)}</small><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p><div class="row"><span class="price">${money(p.price)}</span><div class="btns"><button class="mini" data-act="view" data-id="${p.id}">Смотреть</button><button class="add" data-act="add" data-id="${p.id}">В корзину</button></div></div></article>`).join(''):'<p class="empty">Ничего не найдено</p>'}
@@ -217,7 +226,7 @@ function saveCart(){ls.set('orbit_v3_cart',cart);renderCart()}
 function renderCart(){const ids=Object.keys(cart).filter(P);let s=0,n=0;
  $('#items').innerHTML=ids.length?ids.map(id=>{const p=P(id),q=cart[id];s+=p.price*q;n+=q;return`<div class="it"><img src="${esc(p.img)}" alt=""><div><b>${esc(p.name)}</b><br><small>${money(p.price)}</small></div><div class="qty"><button data-act="dec" data-id="${id}">−</button>${q}<button data-act="inc" data-id="${id}">+</button></div></div>`}).join(''):'<p class="empty">Корзина пуста</p>';
  $('#sum').textContent=money(s);$('#cnt').textContent=n}
-const addCart=id=>{cart[id]=(cart[id]||0)+1;saveCart();toast('Добавлено: '+P(id).name)};
+const addCart=id=>{if(!P(id))return;cart[id]=(cart[id]||0)+1;saveCart();toast('Добавлено: '+P(id).name)};
 
 /* ---- вход, регистрация, админка (Firebase) ---- */
 const fd=sel=>{const o={};document.querySelector(sel).querySelectorAll('input,select,textarea').forEach(el=>{o[el.name]=el.type==='file'?el.files[0]:el.type==='checkbox'?el.checked:el.value});return o};
@@ -242,7 +251,7 @@ onAuthStateChanged(auth,async u=>{
 function readImg(file,max){return new Promise((ok,no)=>{const r=new FileReader();r.onerror=no;r.onload=()=>{const im=new Image();im.onerror=no;im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/webp',.82))};im.src=r.result};r.readAsDataURL(file)})}
 async function adminView(){if(!isAdmin())return;
  if(isSuper()){try{adminList=(await getDocs(collection(db,'admins'))).docs.map(d=>({email:d.id,...d.data()}))}catch(e){adminList=[]}}
- openModal(`<div class="two" style="margin-bottom:1rem"><button class="mini" data-act="close">← К магазину</button><button class="mini" data-act="logout">Выйти из аккаунта</button></div><h3>Новый товар</h3><div id="pf" class="fm"><input name="name" placeholder="Название" required maxlength="40"><div class="two"><input name="price" type="number" step="0.01" min="0" placeholder="Цена, $" required><input name="cat" placeholder="Категория" required maxlength="24"></div><textarea name="desc" rows="2" placeholder="Описание" maxlength="160"></textarea><label>Фото товара (лучше PNG без фона)<input name="img" type="file" accept="image/*" required></label><label>Логотип для частиц вокруг товара (необязательно)<input name="logo" type="file" accept="image/*"></label><label class="chk"><input name="noPart" type="checkbox"> Без частиц</label><label>Цвет фона страницы для этого товара<input name="c1" type="color" value="#7c3aed"></label><div class="err" id="pe"></div><button class="wide" data-act="doAdd">Добавить в магазин</button></div><h3 style="margin-top:1.5rem">Товары (${products.length})</h3>${products.map(p=>`<div class="al"><img src="${esc(p.img)}" alt=""><b>${esc(p.name)}</b><span>${money(p.price)}</span>${p.builtin?'<span>встроенный</span>':`<button data-act="del" data-id="${esc(p.id)}">Удалить</button>`}</div>`).join('')}${superBlock()}`);
+ openModal(`<div class="two" style="margin-bottom:1rem"><button class="mini" data-act="close">← К магазину</button><button class="mini" data-act="logout">Выйти из аккаунта</button></div><h3>Новый товар</h3><div id="pf" class="fm"><input name="name" placeholder="Название" required maxlength="40"><div class="two"><input name="price" type="number" step="0.01" min="0" placeholder="Цена, $" required><input name="cat" placeholder="Категория" required maxlength="24"></div><textarea name="desc" rows="2" placeholder="Описание" maxlength="160"></textarea><label>Фото товара (лучше PNG без фона)<input name="img" type="file" accept="image/*" required></label><label>Логотип для частиц вокруг товара (необязательно)<input name="logo" type="file" accept="image/*"></label><label class="chk"><input name="noPart" type="checkbox"> Без частиц</label><label>Цвет фона страницы для этого товара<input name="c1" type="color" value="#7c3aed"></label><div class="err" id="pe"></div><button class="wide" data-act="doAdd">Добавить в магазин</button></div><h3 style="margin-top:1.5rem">Товары (${products.length})</h3>${products.map(p=>`<div class="al"><img src="${esc(p.img)}" alt=""><b>${esc(p.name)}</b><span>${money(p.price)}</span><button data-act="del" data-id="${esc(p.id)}">Удалить</button></div>`).join('')}${superBlock()}`);
  window.doAdd=async()=>{const f=fd('#pf'),pe=$('#pe');
   if(!f.name.trim()||f.price===''||!f.cat.trim()||!f.img)return pe.textContent='Заполните название, цену, категорию и выберите фото';
   if(!HEX.test(f.c1))return;pe.textContent='Сохраняю…';
@@ -253,14 +262,16 @@ async function adminView(){if(!isAdmin())return;
   catch(x){pe.textContent=x.code==='permission-denied'?'Нет прав на добавление товаров':'Не удалось сохранить товар'}}}
 onSnapshot(collection(db,'products'),snap=>{
  fbProducts=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.created||0)-(b.created||0));
- products=[...DEF.map(x=>({...x,builtin:1})),...fbProducts];
+ products=[...fbProducts];
  cp=Math.min(cp,Math.max(0,products.length-1));
- if(!P(fid)){fid=products[0].id;renderHero();switchProduct(P(fid))}else renderHero();
+ if(!products.length){fid=null;renderHero();switchProduct(null)}
+ else if(!P(fid)){fid=products[0].id;renderHero();switchProduct(P(fid))}
+ else renderHero();
  renderShop();renderCart()},()=>toast('Не удалось загрузить товары из базы'));
 
 document.addEventListener('click',async e=>{const t=e.target.closest('[data-act]');if(!t)return;const id=t.dataset.id;
  const acts={add:()=>addCart(id),addHero:()=>P(fid)&&addCart(fid),pick:()=>pick(id),view:()=>{scrollTo({top:0});pick(id)},cat:()=>{cat=t.dataset.c;renderShop()},
- prev:()=>{cp=(cp-1+products.length)%products.length;renderHero()},next:()=>{cp=(cp+1)%products.length;renderHero()},
+ prev:()=>{if(!products.length)return;cp=(cp-1+products.length)%products.length;renderHero()},next:()=>{if(!products.length)return;cp=(cp+1)%products.length;renderHero()},
  cart:()=>{$('#drawer').classList.add('open');$('#mask').classList.add('open')},close:closeAll,
  inc:()=>{cart[id]++;saveCart()},dec:()=>{if(--cart[id]<=0)delete cart[id];saveCart()},
  checkout:()=>{if(!Object.keys(cart).length)return toast('Корзина пуста');cart={};saveCart();closeAll();toast('Заказ оформлен, спасибо!')},
@@ -282,8 +293,6 @@ $('#modal').addEventListener('click',e=>{if(e.target.id=='modal')closeAll()});
 $('#q').addEventListener('input',e=>{query=e.target.value;renderShop()});
 
 /* ---- старт ---- */
-const p0=P(fid);
-if(p0){Object.entries(colors(p0)).forEach(([k,v])=>document.body.style.setProperty(k,v));prodImg.src=p0.img;if(noPart(p0))allBerries.forEach(b=>b.style.opacity=0)}
 renderHero();renderShop();renderCart();syncAuth();
 </script>
 </body>
